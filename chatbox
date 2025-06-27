@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <title>Chatbox Obs</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    * { margin:0; padding:0; box-sizing:border-box; }
+    body { font-family:'Poppins',sans-serif; background:transparent; overflow:hidden; }
+    .chat-container { display:flex; flex-direction:column; justify-content:flex-end; width:100vw; height:100vh; padding:20px; }
+    .chat-message { margin:6px 0; animation:slideInUp .6s ease forwards; }
+    .username { font-weight:600; font-size:15px; margin-bottom:4px; color:white; text-shadow:0 0 4px #fff,0 0 10px rgba(255,255,255,.8),0 2px 6px rgba(0,0,0,.3); }
+    .message-text { color:white; text-shadow:0 0 10px rgba(16,121,93,.8),0 0 20px rgba(26,168,130,.6),0 0 30px rgba(19,160,118,.4); }
+    .user-badge { display:inline-block; padding:2px 8px; border-radius:12px; font-size:12px; font-weight:600; margin-right:8px; text-transform:uppercase; color:white; background:linear-gradient(135deg,#10795D,#1AA882); border:1px solid rgba(16,121,93,.5); box-shadow:0 2px 8px rgba(16,121,93,.4); }
+    .moderator-badge { background:rgba(255,215,0,.9); color:#000; }
+    .subscriber-badge { background:rgba(147,51,234,.9); }
+    @keyframes slideInUp { from { transform:translateY(50px); opacity:0; } to { transform:translateY(0); opacity:1; } }
+  </style>
+</head>
+<body>
+  <div class="chat-container" id="chat"></div>
+  <script>
+    const chat = document.getElementById('chat');
+    function createMessageElement(data) {
+      const div = document.createElement('div');
+      div.className = 'chat-message';
+      let badgeHTML = '';
+      (data.badges||[]).forEach(b => {
+        let cls = 'user-badge ' + (b.type==='moderator'? 'moderator-badge' : b.type==='subscriber'? 'subscriber-badge':'');
+        badgeHTML += `<span class="${cls}">${b.type.toUpperCase()}</span>`;
+      });
+      div.innerHTML = `<div class="username">${badgeHTML}${data.name}</div><div class="message-text">${data.message}</div>`;
+      return div;
+    }
+    function addMessage(data) {
+      const msg = createMessageElement(data);
+      chat.appendChild(msg);
+      if (chat.children.length > 25) chat.removeChild(chat.firstChild);
+    }
+    window.addEventListener('onEventReceived', e => {
+      if (e.detail.listener === 'message') {
+        const d = e.detail.event;
+        addMessage({ name:d.name, message:d.message, badges: d.badges });
+      }
+    });
+  </script>
+</body>
+</html>
